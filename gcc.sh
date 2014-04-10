@@ -1,0 +1,101 @@
+#!/bin/bash
+
+# package filename/directory i.e. linux-3.13.3
+THIS=gcc-4.8.2
+
+# type of archive i.e. .tar.xz
+TYPE=.tar.bz2
+
+LFS_HOST_DIR=/lfs/7.5-systemd
+PACKAGES=$LFS_HOST_DIR/packages
+PATCHES=$LFS_HOST_DIR/patches
+BUILD=$LFS_HOST_DIR/build
+
+
+echo Entering build directory: $BUILD &&
+cd  $BUILD 
+
+if [ -d $BUILD/$THIS ]; then
+	echo Removing source directory: $BUILD/THIS
+	rm -rf $BUILD/$THIS
+fi
+
+echo Extracting package: $PACKAGES/${THIS}${TYPE} &&
+tar xf $PACKAGES/${THIS}${TYPE} &&
+
+echo Entering source directory: $BUILD/${THIS} &&
+cd $BUILD/$THIS &&
+
+echo Executing build script... &&
+
+# Script
+pwd &&
+tar -Jxf $PACKAGES/mpfr-3.1.2.tar.xz &&
+mv -v mpfr-3.1.2 mpfr &&
+tar -Jxf $PACKAGES/gmp-5.1.3.tar.xz &&
+mv -v gmp-5.1.3 gmp &&
+tar -zxf $PACKAGES/mpc-1.0.2.tar.gz &&
+mv -v mpc-1.0.2 mpc
+
+for file in \
+	$(find gcc/config -name linux64.h -o -name linux.h -o -name sysv4.h)
+do
+	cp -uv $file{,.orig} &&
+	sed -e 's@/lib\(64\)\?\(32\)\?/ld@/tools&@g' \
+	    -e 's@/usr@/tools@g' $file.orig > $file &&
+	echo '
+#undef STANDARD_STARTFILE_PREFIX_1
+#undef STANDARD_STARTFILE_PREFIX_2
+#define STANDARD_STARTFILE_PREFIX_1 "/tools/lib/"
+#define STANDARD_STARTFILE_PREFIX_2 ""' >> $file &&
+	touch $file.orig
+done 
+
+sed -i '/k prot/agcc_cv_libc_provides_ssp=yes' gcc/configure &&
+
+echo Creating build directory: $BUILD/$THIS-build &&
+mkdir $BUILD/$THIS-build &&
+echo Entering build directory... &&
+cd $BUILD/$THIS-build &&
+
+$BUILD/$THIS/configure \
+--target=$LFS_TGT \
+--prefix=/tools \
+--with-sysroot=$LFS \
+--with-newlib \
+--without-headers \
+--with-local-prefix=/tools \
+--with-native-system-header-dir=/tools/include \
+--disable-nls \
+--disable-shared \
+--disable-multilib \
+--disable-decimal-float \
+--disable-threads \
+--disable-libatomic \
+--disable-libgomp \
+--disable-libitm \
+--disable-libmudflap \
+--disable-libquadmath \
+--disable-libsanitizer \
+--disable-libssp \
+--disable-libstdc++-v3 \
+--enable-languages=c,c++ \
+--with-mpfr-include=$(pwd)/../$THIS/mpfr/src \
+--with-mpfr-lib=$(pwd)/mpfr/src/.libs &&
+
+make &&
+make install &&
+ln -sv libgcc.a `$LFS_TGT-gcc -print-libgcc-file-name | sed 's/libgcc/&_eh/'` &&
+
+# End of Script
+
+echo Leaving build directory... &&
+cd $BUILD &&
+
+echo Removing build directory &&
+rm -rf $BUILD/$THIS-build &&
+
+echo Removing source directory... &&
+rm -rf $BUILD/$THIS &&
+
+echo Build done: $THIS
