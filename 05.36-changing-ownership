@@ -1,0 +1,5 @@
+#!/bin/bash -e
+
+# This needs to be run as root on the host system.
+echo Changing ownership of $LFS/tools...
+chown -R root:root $LFS/tools

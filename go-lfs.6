@@ -1,0 +1,13 @@
+#!/bin/sh
+
+
+$SCRIPTS/06.02-prepare-vfs
+
+$SCRIPTS/06.04-enter-chroot
+
+umount $LFS/run
+umount $LFS/sys
+umount $LFS/proc
+umount $LFS/dev/pts
+umount $LFS/dev
+

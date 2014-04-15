@@ -1,7 +1,9 @@
 #!/bin/bash -e
 
+NAME=Coreutils
+
 # package filename/directory i.e. linux-3.13.3
-THIS=man-pages-3.59
+THIS=coreutils-8.22
 
 # type of archive i.e. .tar.xz
 TYPE=.tar.xz
@@ -12,21 +14,21 @@ TYPE=.tar.xz
 #BUILD=$LFS_HOST_DIR/build
 
 
-echo Entering build directory: $BUILD
+echo Entering directory: $BUILD
 cd  $BUILD 
 
 if [ -d $BUILD/$THIS ]; then
-	echo Removing source directory: $BUILD/$THIS
+	echo Removing source directory: $BUILD/THIS
 	rm -rf $BUILD/$THIS
 fi
 
-echo Extracting package: $PACKAGES/${THIS}${TYPE}
-tar xf $PACKAGES/${THIS}${TYPE}
+echo Extracting package: $PACKAGES/${THIS}${TYPE} &&
+tar xf $PACKAGES/${THIS}${TYPE} &&
 
-echo Entering source directory: $BUILD/${THIS}
-cd $BUILD/$THIS
+echo Entering source directory: $BUILD/${THIS} &&
+cd $BUILD/$THIS &&
 
-echo Executing build script...
+echo Executing build script... &&
 
 # Script
 
@@ -34,10 +36,19 @@ if [ -d $BUILD/$THIS-build ]; then
 	echo Removing build directory: $BUILD/$THIS-build
 	rm -rf $BUILD/$THIS-build
 fi
+
 #echo Creating build directory: $BUILD/$THIS-build &&
 #mkdir $BUILD/$THIS-build &&
 #echo Entering build directory... &&
 #cd $BUILD/$THIS-build &&
+
+
+$BUILD/$THIS/configure --prefix=/tools --enable-install-program=hostname
+
+
+make
+
+#make RUN_EXPENSIVE_TESTS=yes check
 
 make install
 
@@ -51,7 +62,7 @@ if [ -d $BUILD/$THIS-build ]; then
 	rm -rf $BUILD/$THIS-build
 fi
 
-echo Removing source directory...
+echo Removing source directory: $BUILD/$THIS
 rm -rf $BUILD/$THIS
 
-echo Build done: $THIS
+echo Build done: $NAME

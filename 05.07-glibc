@@ -6,10 +6,10 @@ THIS=glibc-2.19
 # type of archive i.e. .tar.xz
 TYPE=.tar.xz
 
-LFS_HOST_DIR=/lfs/7.5-systemd
-PACKAGES=$LFS_HOST_DIR/packages
-PATCHES=$LFS_HOST_DIR/patches
-BUILD=$LFS_HOST_DIR/build
+#LFS_HOST_DIR=/lfs/7.5-systemd
+#PACKAGES=$LFS_HOST_DIR/packages
+#PATCHES=$LFS_HOST_DIR/patches
+#BUILD=$LFS_HOST_DIR/build
 
 
 echo Entering build directory: $BUILD &&

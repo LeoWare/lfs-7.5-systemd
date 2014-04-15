@@ -1,0 +1,9 @@
+#!/bin/bash -e
+
+echo Stripping debugging information...
+
+strip --strip-debug /tools/lib/*
+/usr/bin/strip --strip-unneeded /tools/{,s}bin/*
+
+#echo Removing documentation...
+#rm -rf /tools/{,share}/{info,man,doc}
